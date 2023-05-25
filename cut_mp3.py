@@ -37,7 +37,7 @@ def parse_time(time_str: str) -> int:
 
 def cut_mp3(input_file: str, output_file: str, start_time: int, end_time: int) -> None:
     """Cuts an mp3 file from start_time to end_time."""
-    audio = AudioSegment.from_mp3(input_file)
+    audio = AudioSegment.from_file(input_file)
     cut_audio = audio[start_time:end_time]
     cut_audio.export(output_file, format="mp3")
 
