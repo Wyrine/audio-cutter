@@ -2,22 +2,28 @@
 
 """
 A script to cut a portion of an audio file from a starting timestamp to an ending timestamp.
+It can also download a YouTube video, convert it to audio, and cut a portion of the audio.
 
-Usage: python cut_audio.py -i input.mp3 -o output.mp3 -s 1m30s -e 2m15s
+Usage: 
+  python cut_audio.py -i input.mp3 -o output.mp3 -s 1m30s -e 2m15s
+  python cut_audio.py -u "youtube_url" -o output.mp3 -s 1m30s -e 2m15s
 
-The script takes 4 command line arguments:
-1. input_file - The audio file to cut.
-2. output_file - The file to save the cut audio to.
-3. start_time - The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
-4. end_time - The end time in the same format as start_time. Default is the end of the audio.
+The script takes 5 command line arguments:
+1. input_file - The local audio file to cut.
+2. youtube_url - The YouTube URL to download, convert to audio, and cut.
+3. output_file - The file to save the cut audio to.
+4. start_time - The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
+5. end_time - The end time in the same format as start_time. Default is the end of the audio.
 
-The start and end times are inclusive.
+Only one of input_file and youtube_url should be provided.
 
-This script uses the pydub library and assumes that ffmpeg is installed and available in the system's PATH.
+This script uses the pydub and youtube_dl libraries and assumes that ffmpeg is installed and available in the system's PATH.
 """
 
 import argparse
+import os
 import re
+import youtube_dl
 from pydub import AudioSegment
 from typing import Optional
 
@@ -45,15 +51,38 @@ def cut_audio(input_file: str, output_file: str, start_time: Optional[int], end_
     cut_audio = audio[start_time:end_time]
     cut_audio.export(output_file, format=output_file.split('.')[-1])
 
+def download_audio(youtube_url: str, output_file: str) -> None:
+    """Download a YouTube video, convert it to audio, and save it to a file."""
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': output_file,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': output_file.split('.')[-1],
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Cut audio files.')
-    parser.add_argument('-i', '--input_file', type=str, required=True, help='Input audio file')
+    parser = argparse.ArgumentParser(description='Cut audio files or YouTube videos.')
+    parser.add_argument('-i', '--input_file', type=str, required=False, help='Input audio file')
+    parser.add_argument('-u', '--youtube_url', type=str, required=False, help='YouTube URL')
     parser.add_argument('-o', '--output_file', type=str, required=True, help='Output audio file')
     parser.add_argument('-s', '--start_time', type=parse_time, required=False, default=None, help='Start time in XmYs or XhYmZs format')
     parser.add_argument('-e', '--end_time', type=parse_time, required=False, default=None, help='End time in XmYs or XhYmZs format')
     args = parser.parse_args()
 
-    cut_audio(args.input_file, args.output_file, args.start_time, args.end_time)
+    if args.youtube_url and args.input_file:
+        raise ValueError('Only one of input_file and youtube_url should be provided.')
+
+    if args.youtube_url:
+        download_audio(args.youtube_url, args.output_file)
+        input_file = args.output_file
+    else:
+        input_file = args.input_file
+
+    cut_audio(input_file, args.output_file, args.start_time, args.end_time)
 
 if __name__ == "__main__":
     main()
