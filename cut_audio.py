@@ -43,7 +43,7 @@ def cut_audio(input_file: str, output_file: str, start_time: Optional[int], end_
     """Cuts an audio file from start_time to end_time."""
     audio = AudioSegment.from_file(input_file)
     cut_audio = audio[start_time:end_time]
-    cut_audio.export(output_file, format="mp3")
+    cut_audio.export(output_file, format=output_file.split('.')[-1])
 
 def main() -> None:
     parser = argparse.ArgumentParser(description='Cut audio files.')
