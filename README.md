@@ -1,4 +1,5 @@
 # Audio Cutter
+![Tests](https://github.com/Wyrine/audio-cutter/actions/workflows/.github/workflows/test.yml/badge.svg?branch=main)
 
 This Python script cuts a portion of an audio file from a starting timestamp to an ending timestamp. The input audio file, the output file, the start time, and the end time are provided as command-line arguments. If not provided, the start time defaults to the beginning of the audio file and the end time defaults to the end of the audio file. This script uses the `pydub` library and assumes that `ffmpeg` is installed and available in the system's PATH.
 
