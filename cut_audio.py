@@ -66,11 +66,11 @@ def download_audio(youtube_url: str, output_file: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description='Cut audio files or YouTube videos.')
-    parser.add_argument('-i', '--input_file', type=str, required=False, help='Input audio file')
-    parser.add_argument('-u', '--youtube_url', type=str, required=False, help='YouTube URL')
-    parser.add_argument('-o', '--output_file', type=str, required=True, help='Output audio file')
-    parser.add_argument('-s', '--start_time', type=parse_time, required=False, default=None, help='Start time in XmYs or XhYmZs format')
-    parser.add_argument('-e', '--end_time', type=parse_time, required=False, default=None, help='End time in XmYs or XhYmZs format')
+    parser.add_argument('-i', '--input-file', type=str, required=False, help='Input audio file')
+    parser.add_argument('-u', '--youtube-url', type=str, required=False, help='YouTube URL')
+    parser.add_argument('-o', '--output-file', type=str, required=True, help='Output audio file')
+    parser.add_argument('-s', '--start-time', type=parse_time, required=False, default=None, help='Start time in XmYs or XhYmZs format')
+    parser.add_argument('-e', '--end-time', type=parse_time, required=False, default=None, help='End time in XmYs or XhYmZs format')
     args = parser.parse_args()
 
     if args.youtube_url and args.input_file:
