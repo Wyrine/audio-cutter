@@ -40,9 +40,10 @@ The start and end times are optional and inclusive. That is, the resulting audio
 
 The script expects the arguments in the following format:
 
-* `-i` or `--input_file`: The audio file to cut.
-* `-o` or `--output_file`: The file to save the cut audio to.
-* `-s` or `--start_time`: The start time in XmYs or XhYmZs format. Optional.
-* `-e` or `--end_time`: The end time in XmYs or XhYmZs format. Optional.
+* `-i` or `--input-file`: The audio file to cut.
+* `-u` or `--youtube-url`: The url to use instead of the `--input-file` arg.
+* `-o` or `--output-file`: The file to save the cut audio to.
+* `-s` or `--start-time`: The start time in XmYs or XhYmZs format. Optional.
+* `-e` or `--end-time`: The end time in XmYs or XhYmZs format. Optional.
 
-You can use either the short version (`-i`, `-o`, `-s`, `-e`) or the long version (`--input_file`, `--output_file`, `--start_time`, `--end_time`) of the command-line arguments.
+You can use either the short version (`-i`, `-o`, `-s`, `-e`, `-u`) or the long version (`--input-file`, `--output-file`, `--start-time`, `--end-time`, `--youtube-url`) of the command-line arguments.

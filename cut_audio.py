@@ -6,14 +6,14 @@ It can also download a YouTube video, convert it to audio, and cut a portion of 
 
 Usage: 
   python cut_audio.py -i input.mp3 -o output.mp3 -s 1m30s -e 2m15s
-  python cut_audio.py -u "youtube_url" -o output.mp3 -s 1m30s -e 2m15s
+  python cut_audio.py -u "youtube-url" -o output.mp3 -s 1m30s -e 2m15s
 
 The script takes 5 command line arguments:
-1. input_file - The local audio file to cut.
-2. youtube_url - The YouTube URL to download, convert to audio, and cut.
-3. output_file - The file to save the cut audio to.
-4. start_time - The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
-5. end_time - The end time in the same format as start_time. Default is the end of the audio.
+1. input-file - The local audio file to cut.
+2. youtube-url - The YouTube URL to download, convert to audio, and cut.
+3. output-file - The file to save the cut audio to.
+4. start-time - The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
+5. end-time - The end time in the same format as start_time. Default is the end of the audio.
 
 Only one of input_file and youtube_url should be provided.
 
@@ -73,15 +73,17 @@ def download_audio(youtube_url: str, output_file: str, speed: float) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(
         description='Cut audio files or YouTube videos.')
-    parser.add_argument('-i', '--input_file', type=str,
+    parser = argparse.ArgumentParser(
+        description='Cut audio files or YouTube videos.')
+    parser.add_argument('-i', '--input-file', type=str,
                         required=False, help='Input audio file')
-    parser.add_argument('-u', '--youtube_url', type=str,
+    parser.add_argument('-u', '--youtube-url', type=str,
                         required=False, help='YouTube URL')
-    parser.add_argument('-o', '--output_file', type=str,
+    parser.add_argument('-o', '--output-file', type=str,
                         required=True, help='Output audio file')
-    parser.add_argument('-s', '--start_time', type=parse_time, required=False,
+    parser.add_argument('-s', '--start-time', type=parse_time, required=False,
                         default=None, help='Start time in XmYs or XhYmZs format')
-    parser.add_argument('-e', '--end_time', type=parse_time, required=False,
+    parser.add_argument('-e', '--end-time', type=parse_time, required=False,
                         default=None, help='End time in XmYs or XhYmZs format')
     parser.add_argument('-sp', '--speed', type=float, required=False,
                         default=1.0, help='Speed to play audio at')
