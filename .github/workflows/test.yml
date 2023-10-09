@@ -24,5 +24,6 @@ jobs:
           pip install ruff pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
+        working-directory: ./audio_cutter
         run: |
           pytest
