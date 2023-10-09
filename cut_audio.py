@@ -2,22 +2,24 @@
 
 """
 A script to cut a portion of an audio file from a starting timestamp to an ending timestamp.
-It can also download a YouTube video, convert it to audio, and cut a portion of the audio.
+It can also download a media file from a YouTube or SoundCloud URL, optionally speed up the audio,
+convert it to an audio file, and cut a portion of the audio.
 
 Usage: 
   python cut_audio.py -i input.mp3 -o output.mp3 -s 1m30s -e 2m15s
-  python cut_audio.py -u "youtube-url" -o output.mp3 -s 1m30s -e 2m15s
+  python cut_audio.py -u "media-url" -o output.mp3 -s 1m30s -e 2m15s -sp 1.5
 
-The script takes 5 command line arguments:
-1. input-file - The local audio file to cut.
-2. youtube-url - The YouTube URL to download, convert to audio, and cut.
-3. output-file - The file to save the cut audio to.
-4. start-time - The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
-5. end-time - The end time in the same format as start_time. Default is the end of the audio.
+The script takes six command line arguments:
+1. input-file (-i, --input-file): The local audio file to cut.
+2. media-url (-u, --url): The YouTube or SoundCloud URL to download, optionally speed up, convert to audio, and cut.
+3. output-file (-o, --output-file): The file to save the cut audio to.
+4. start-time (-s, --start-time): The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
+5. end-time (-e, --end-time): The end time in the same format as start_time. Default is the end of the audio.
+6. speed (-sp, --speed): The speed to play the audio at, e.g., 1.5 for 1.5x speed. Default is 1.0 (normal speed).
 
-Only one of input_file and youtube_url should be provided.
+Only one of input_file and media_url should be provided.
 
-This script uses the pydub and youtube_dl libraries and assumes that ffmpeg is installed and available in the system's PATH.
+This script uses the pydub, youtube_dl, and ffmpeg libraries and assumes that ffmpeg is installed and available in the system's PATH.
 """
 
 import argparse
@@ -28,7 +30,7 @@ from pydub import AudioSegment
 from typing import Optional
 
 
-def parse_time(time_str: Optional[str]) -> Optional[int]:
+def _parse_time(time_str: Optional[str]) -> Optional[int]:
     """Parses a time string in an arbitrary format (XmYs, XhYmZs, etc.) and returns the time in milliseconds."""
     if time_str is None:
         return None
@@ -47,14 +49,14 @@ def parse_time(time_str: Optional[str]) -> Optional[int]:
     return ((hours * 60 + minutes) * 60 + seconds) * 1000
 
 
-def cut_audio(input_file: str, output_file: str, start_time: Optional[int], end_time: Optional[int]) -> None:
+def _cut_audio(input_file: str, output_file: str, start_time: Optional[int], end_time: Optional[int]) -> None:
     """Cuts an audio file from start_time to end_time."""
     audio = AudioSegment.from_file(input_file)
-    cut_audio = audio[start_time:end_time]
-    cut_audio.export(output_file, format=output_file.split('.')[-1])
+    audio_snippet = audio[start_time:end_time]
+    audio_snippet.export(output_file, format=output_file.split('.')[-1])
 
 
-def download_audio(youtube_url: str, output_file: str, speed: float) -> None:
+def _download_audio(url: str, output_file: str, speed: float) -> None:
     """Download a YouTube video, convert it to audio, and save it to a file."""
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -67,40 +69,42 @@ def download_audio(youtube_url: str, output_file: str, speed: float) -> None:
         ],
     }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([youtube_url])
+        ydl.download([url])
 
 
-def main() -> None:
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description='Cut audio files or YouTube videos.')
-    parser = argparse.ArgumentParser(
-        description='Cut audio files or YouTube videos.')
+        description='Cut audio files or media from URLs.')
     parser.add_argument('-i', '--input-file', type=str,
                         required=False, help='Input audio file')
-    parser.add_argument('-u', '--youtube-url', type=str,
-                        required=False, help='YouTube URL')
+    parser.add_argument('-u', '--url', type=str,
+                        required=False, help='Media URL')
     parser.add_argument('-o', '--output-file', type=str,
                         required=True, help='Output audio file')
-    parser.add_argument('-s', '--start-time', type=parse_time, required=False,
+    parser.add_argument('-s', '--start-time', type=_parse_time, required=False,
                         default=None, help='Start time in XmYs or XhYmZs format')
-    parser.add_argument('-e', '--end-time', type=parse_time, required=False,
+    parser.add_argument('-e', '--end-time', type=_parse_time, required=False,
                         default=None, help='End time in XmYs or XhYmZs format')
     parser.add_argument('-sp', '--speed', type=float, required=False,
                         default=1.0, help='Speed to play audio at')
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    if args.youtube_url and args.input_file:
+
+def process(url: str, input_file: str, output_file: str, start_time: str | int, end_time: str | int, speed: float):
+    if url and input_file:
         raise ValueError(
-            'Only one of input_file and youtube_url should be provided.')
+            'Only one of input_file and url should be provided.')
 
-    if args.youtube_url:
-        download_audio(args.youtube_url, args.output_file, args.speed)
-        input_file = args.output_file
+    if url:
+        _download_audio(url, output_file, speed)
+        input_file = output_file
     else:
-        input_file = args.input_file
+        input_file = input_file
 
-    cut_audio(input_file, args.output_file, args.start_time, args.end_time)
+    _cut_audio(input_file, output_file, start_time, end_time)
 
 
 if __name__ == "__main__":
-    main()
+    args = _parse_args()
+    process(url=args.url, input_file=args.input_file, output_file=args.output_file,
+            start_time=args.start_time, end_time=args.end_time, speed=args.speed)
