@@ -12,7 +12,7 @@ Usage:
 The script takes six command line arguments:
 1. input-file (-i, --input-file): The local audio file to cut.
 2. media-url (-u, --url): The YouTube or SoundCloud URL to download, optionally speed up, convert to audio, and cut.
-3. output-file (-o, --output-file): The file to save the cut audio to.
+3. output-file (-o, --output-file): The file to save the cut audio to. Default is 'result.mp3'.
 4. start-time (-s, --start-time): The start time in an arbitrary format (e.g., XmYs or XhYmZs). Default is the beginning of the audio.
 5. end-time (-e, --end-time): The end time in the same format as start_time. Default is the end of the audio.
 6. speed (-sp, --speed): The speed to play the audio at, e.g., 1.5 for 1.5x speed. Default is 1.0 (normal speed).
@@ -79,8 +79,8 @@ def _parse_args() -> argparse.Namespace:
                         required=False, help='Input audio file')
     parser.add_argument('-u', '--url', type=str,
                         required=False, help='Media URL')
-    parser.add_argument('-o', '--output-file', type=str,
-                        required=True, help='Output audio file')
+    parser.add_argument('-o', '--output-file', help='Output audio file',
+                        default='result.mp3', type=str, required=False)
     parser.add_argument('-s', '--start-time', type=_parse_time, required=False,
                         default=None, help='Start time in XmYs or XhYmZs format')
     parser.add_argument('-e', '--end-time', type=_parse_time, required=False,
@@ -90,10 +90,18 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process(url: str, input_file: str, output_file: str, start_time: str | int, end_time: str | int, speed: float):
-    if url and input_file:
+def process(url: str = None, input_file: str = None, output_file: str = "result.mp3", start_time: str | int = None, end_time: str | int = None, speed: float = 1.0):
+    if not (url or input_file):
+        raise ValueError(
+            'One of input_file and url should be provided.')
+    elif url and input_file:
         raise ValueError(
             'Only one of input_file and url should be provided.')
+
+    if isinstance(start_time, str):
+        start_time = _parse_time(start_time)
+    if isinstance(end_time, str):
+        end_time = _parse_time(end_time)
 
     if url:
         _download_audio(url, output_file, speed)
