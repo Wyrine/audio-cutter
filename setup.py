@@ -5,5 +5,5 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=["pydub", "pytest",
-                      "git+https://github.com/ytdl-org/youtube-dl.git"],
+                      "youtube-dl @ git+https://github.com/ytdl-org/youtube-dl.git"],
 )
