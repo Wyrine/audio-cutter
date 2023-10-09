@@ -8,7 +8,9 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.11']
-
+    defaults:
+      run:
+        working-directory: ./app
     steps:
       - uses: actions/checkout@v3
       - uses: FedericoCarboni/setup-ffmpeg@v2
@@ -18,12 +20,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: ./audio_cutter
         run: |
           python -m pip install --upgrade pip
           pip install ruff pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
-        working-directory: ./audio_cutter
         run: |
-          pytest
+          python -m pytest
+      - name: Test pip installing this package
+        run: |
+          python -m pip install "git+https://github.com/Wyrine/audio-cutter.git"
