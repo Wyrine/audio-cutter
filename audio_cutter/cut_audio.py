@@ -28,6 +28,7 @@ import re
 import youtube_dl
 from pydub import AudioSegment
 from typing import Optional
+from tempfile import TemporaryDirectory
 
 
 def _parse_time(time_str: Optional[str]) -> Optional[int]:
@@ -58,18 +59,22 @@ def _cut_audio(input_file: str, output_file: str, start_time: Optional[int], end
 
 def _download_audio(url: str, output_file: str, speed: float) -> None:
     """Download a YouTube video, convert it to audio, and save it to a file."""
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': output_file,
-        'postprocessors': [
-            {
-                'key': "ExecAfterDownload",
-                'exec_cmd': f"ffmpeg -i {{}} -vn -af \"atempo={speed}\" processed_{{}}; rm {{}}; mv processed_{{}} {{}}",
-            },
-        ],
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    with TemporaryDirectory() as temp_dir:
+        temp_file = os.path.join(
+            temp_dir, f"processed.{output_file.split('.')[-1]}")
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': output_file,
+            'postprocessors': [
+                {
+                    'key': "ExecAfterDownload",
+                    'exec_cmd': f"ffmpeg -i {{}} -vn -af \"atempo={speed}\" {temp_file}; mv {temp_file} {{}}",
+                },
+            ],
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
 
 
 def _parse_args() -> argparse.Namespace:
